@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
 
     #endregion
 
-    public PlayerController Controller = new PlayerController();
+    public PlayerControllerBase Controller = new PlayerControllerBase();
 
     public Facing PlayerFacing;
 
@@ -132,7 +132,7 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
-        this.Controller.ReadHardware();
+        this.Controller.UpdateController();
 
         // raycast to see if touching ground
         var cast = Physics2D.Raycast(this.body.position, Vector2.down, height * 0.52f, GroundPhysicsLayerMask);

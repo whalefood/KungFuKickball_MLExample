@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class AIPlayerController : PlayerController
+public class AIPlayerController : PlayerControllerBase
 {
     public bool AttackAction;
 
@@ -14,7 +14,7 @@ public class AIPlayerController : PlayerController
     public int MovementAction;
 
 
-    public override void ReadHardware()
+    public override void UpdateController()
     {
         this.AttackButton.Pressed = AttackAction;
         this.JumpButton.Pressed = JumpAction;

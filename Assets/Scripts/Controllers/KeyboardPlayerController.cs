@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class KeyboardPlayerController : PlayerController
+public class KeyboardPlayerController : PlayerControllerBase
 {
-    public override void ReadHardware()
+    public override void UpdateController()
     {
         this.AttackButton.Pressed = Input.GetKey(KeyCode.K);
         this.JumpButton.Pressed = Input.GetKey(KeyCode.J);

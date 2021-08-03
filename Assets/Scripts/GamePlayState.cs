@@ -28,7 +28,7 @@ public class GamePlayState : MonoBehaviour
 
     public Action ResetState { get; private set; }
 
-    public Action<Player.Team> OnTeamScored = (t) => { };
+    public event Action<Player.Team> OnTeamScored;
 
     public PlayerControlType BluePlayerControllerType;
 

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class PlayerController
+public class PlayerControllerBase
 {
     public class Button
     {
@@ -30,7 +30,10 @@ public class PlayerController
 
     public Button AttackButton = new Button();
 
+    /// <summary>
+    /// Value from -1 to 1
+    /// </summary>
     public float StickValueX { get; set; }
 
-    public virtual void ReadHardware() { }
+    public virtual void UpdateController() { }
 }
