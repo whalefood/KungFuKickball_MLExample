@@ -21,7 +21,7 @@ public class Player : MonoBehaviour
 
     #endregion
 
-    public PlayerControllerBase Controller = new PlayerControllerBase();
+    public PlayerControllerBase Controller;
 
     public Facing PlayerFacing;
 
@@ -51,7 +51,7 @@ public class Player : MonoBehaviour
     [SerializeField]
     float KickForce;
 
-    private Rigidbody2D body;
+    public Rigidbody2D Body { get; private set; }
 
     private float height;
 
@@ -63,18 +63,18 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
-        this.body = GetComponent<Rigidbody2D>();
+        this.Body = GetComponent<Rigidbody2D>();
 
         var collider = GetComponent<CapsuleCollider2D>();
         this.height = collider.size.y;
 
-        var startPos = this.body.position;
+        var startPos = this.Body.position;
         var startFacing = this.PlayerFacing;
 
         ResetPosition = () =>
         {
-            this.body.position = startPos;
-            this.body.velocity = Vector2.zero;
+            this.Body.position = startPos;
+            this.Body.velocity = Vector2.zero;
             SetAttacking(false);
             UpdateFacingDirection((int)startFacing);
         };
@@ -132,10 +132,15 @@ public class Player : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if(this.Controller == null)
+        {
+            return;
+        }
+
         this.Controller.UpdateController();
 
         // raycast to see if touching ground
-        var cast = Physics2D.Raycast(this.body.position, Vector2.down, height * 0.52f, GroundPhysicsLayerMask);
+        var cast = Physics2D.Raycast(this.Body.position, Vector2.down, height * 0.52f, GroundPhysicsLayerMask);
         this.OnGround = cast.collider;
 
         // resolve running
@@ -146,26 +151,26 @@ public class Player : MonoBehaviour
         }
         if (!Attacking)
         {
-            this.body.AddForce(Vector2.right * horzForce, ForceMode2D.Force);
+            this.Body.AddForce(Vector2.right * horzForce, ForceMode2D.Force);
         }
         UpdateFacingDirection(this.Controller.StickValueX);
 
-        var limitedVel = this.body.velocity;
+        var limitedVel = this.Body.velocity;
         if (this.OnGround)
         {
             limitedVel.x *= dragFactor;
         }
 
-        if (Mathf.Abs(this.body.velocity.x) > this.MaxRunSpeed)
+        if (Mathf.Abs(this.Body.velocity.x) > this.MaxRunSpeed)
         {
             limitedVel.x = this.MaxRunSpeed * (limitedVel.x < 0 ? -1 : 1);
         }
-        this.body.velocity = limitedVel;
+        this.Body.velocity = limitedVel;
 
         //resolve jumping
         if (!Attacking && this.OnGround && this.Controller.JumpButton.WasPressedThisFrame)
         {
-            this.body.AddForce(Vector2.up * this.JumpForce, ForceMode2D.Impulse);
+            this.Body.AddForce(Vector2.up * this.JumpForce, ForceMode2D.Impulse);
         }
 
         //resolve attacking

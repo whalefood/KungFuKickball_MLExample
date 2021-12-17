@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public class PlayerControllerBase
+public abstract class PlayerControllerBase
 {
     public class Button
     {
@@ -36,4 +36,5 @@ public class PlayerControllerBase
     public float StickValueX { get; set; }
 
     public virtual void UpdateController() { }
+
 }

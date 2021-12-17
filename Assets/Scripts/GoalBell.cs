@@ -13,7 +13,7 @@ public class GoalBell : MonoBehaviour
     {
         if (collision.collider.CompareTag("Ball"))
         {
-            OnGoal.Invoke();
+            OnGoal?.Invoke();
         }
     }
 }

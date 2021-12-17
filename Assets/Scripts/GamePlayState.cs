@@ -28,7 +28,7 @@ public class GamePlayState : MonoBehaviour
 
     public Action ResetState { get; private set; }
 
-    public event Action<Player.Team> OnTeamScored;
+    public event Action<Player.Team> OnTeamScored = (t) => { };
 
     public PlayerControlType BluePlayerControllerType;
 
@@ -56,8 +56,8 @@ public class GamePlayState : MonoBehaviour
         }
         else if(controlType == PlayerControlType.AI)
         {
-            var AI = player.GetComponentInChildren<KFKPlayerAgent>(true);
-            AI.gameObject.SetActive(true);
+           // var AI = player.GetComponentInChildren<KFKPlayerAgent>(true);
+         //   AI.gameObject.SetActive(true);
         }
     }
 

@@ -1,6 +1,8 @@
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using UnityEngine;
@@ -9,36 +11,33 @@ public class KFKPlayerAgent : Agent
 {
     Player thisPlayer;
 
-    Player Opponent;
-
-    Rigidbody2D Ball;
-
     AIPlayerController controller;
 
+    Player opponent;
+
+    Rigidbody2D ball;
 
     public override void Initialize()
     {
-        foreach (var player in FindObjectsOfType<Player>())
-        {
-            if (player.transform == this.transform.parent)
-            {
-                thisPlayer = player;
-            }
-            else
-            {
-                Opponent = player;
-            }
-        }
+        thisPlayer = this.transform.parent.GetComponent<Player>();
 
         controller = new AIPlayerController();
         thisPlayer.Controller = controller;
 
-        Ball = GameObject.FindGameObjectWithTag("Ball").GetComponent<Rigidbody2D>();
+        ball = GameObject.FindGameObjectWithTag("Ball").GetComponent<Rigidbody2D>();
 
-        var gamePlayState = FindObjectOfType<GamePlayState>();
-        gamePlayState.OnTeamScored += (team) =>
+        foreach (var player in FindObjectsOfType<Player>())
         {
-            if(team == thisPlayer.PlayerTeam)
+            if (player != thisPlayer)
+            {
+                opponent = player;
+            }
+        }
+
+        var gameplayState = FindObjectOfType<GamePlayState>();
+        gameplayState.OnTeamScored += (team) =>
+        {
+            if (team == thisPlayer.PlayerTeam)
             {
                 AddReward(1);
             }
@@ -50,11 +49,9 @@ public class KFKPlayerAgent : Agent
             EndEpisode();
         };
 
-        this.MaxStep = 100;
         if (Academy.Instance.IsCommunicatorOn)
         {
-            this.MaxStep = 5000;
-            ForceReset = gamePlayState.ResetState;
+            ForceReset = gameplayState.ResetState;
         }
     }
 
@@ -67,42 +64,38 @@ public class KFKPlayerAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // flip observations if on the red team
+        // flip observations depending on the team 
         var teamFlipperVec = Vector2.one;
         if(thisPlayer.PlayerTeam == Player.Team.Red)
         {
             teamFlipperVec.x = -1;
         }
 
-        //first add info about ourselves
+        // first add information about ourself
         sensor.AddObservation(Vector2.Scale(thisPlayer.transform.position, teamFlipperVec));
-        sensor.AddObservation(Vector2.Scale(thisPlayer.GetComponent<Rigidbody2D>().velocity, teamFlipperVec));
+        sensor.AddObservation(Vector2.Scale(thisPlayer.Body.velocity, teamFlipperVec));
         sensor.AddObservation((int)thisPlayer.PlayerFacing * teamFlipperVec.x);
         sensor.AddObservation(thisPlayer.Attacking);
 
-        // then add info about opponent
-        sensor.AddObservation(Vector2.Scale(Opponent.transform.position, teamFlipperVec));
-        sensor.AddObservation(Vector2.Scale(Opponent.GetComponent<Rigidbody2D>().velocity, teamFlipperVec));
+        // then add info about the opponent
+        sensor.AddObservation(Vector2.Scale(opponent.transform.position, teamFlipperVec));
+        sensor.AddObservation(Vector2.Scale(opponent.Body.velocity, teamFlipperVec));
 
-        // finally add info about ball
-        sensor.AddObservation(Vector2.Scale(Ball.position, teamFlipperVec));
-        sensor.AddObservation(Vector2.Scale(Ball.velocity, teamFlipperVec));
+        // Finally add info about the ball
+        sensor.AddObservation(Vector2.Scale(ball.position, teamFlipperVec));
+        sensor.AddObservation(Vector2.Scale(ball.velocity, teamFlipperVec));
+
     }
 
     public override void OnActionReceived(float[] vectorAction)
     {
-        // movement action
-        this.controller.MovementAction = Mathf.FloorToInt(vectorAction[0]);
-        if (this.controller.MovementAction == 2)
+        // movement actions
+        var movement = Mathf.FloorToInt(vectorAction[0]);
+        if(movement == 2)
         {
-            this.controller.MovementAction = -1;
+            movement = -1;
         }
-
-        if (thisPlayer.PlayerTeam == Player.Team.Red)
-        {
-            this.controller.MovementAction *= -1;
-        }
-
+        controller.MovementAction = movement;
 
         // button actions
         this.controller.JumpAction = false;
@@ -117,10 +110,5 @@ public class KFKPlayerAgent : Agent
                 this.controller.AttackAction = true;
                 break;
         }
-
-    }
-
-    public override void Heuristic(float[] actionsOut)
-    {
     }
 }

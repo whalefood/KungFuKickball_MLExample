@@ -17,10 +17,9 @@ public class KeyboardPlayerController : PlayerControllerBase
         {
             StickValueX = -1;
         }
-        else if (Input.GetKey(KeyCode.D))
+        else if(Input.GetKey(KeyCode.D))
         {
             StickValueX = 1;
         }
-
     }
 }
